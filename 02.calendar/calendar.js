@@ -1,6 +1,7 @@
+const options = require('minimist')(process.argv.slice(2))
 const today = new Date()
-const year = today.getFullYear()
-const month = today.getMonth() + 1
+const year = options.y ? options.y : today.getFullYear()
+const month = options.m ? options.m : today.getMonth() + 1
 const firstWday = new Date(year, month - 1, 1).getDay()
 const lastDay = new Date(year, month, 0).getDate()
 
