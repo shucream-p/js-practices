@@ -17,6 +17,7 @@
     "eslint-plugin-promise": "^6.0.0"
   },
   "dependencies": {
+    "enquirer": "^2.3.6",
     "sqlite3": "^5.0.8"
   }
 }

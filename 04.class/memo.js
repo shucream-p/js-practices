@@ -12,6 +12,40 @@ if (options.l) {
     })
   })
   db.close()
+} else if (options.r) {
+  (() => {
+    return new Promise(resolve => {
+      const memoTitles = []
+      db.all('SELECT title FROM memos', (err, rows) => {
+        if (err) {
+          console.error(err.message)
+        }
+        rows.forEach(row => {
+          memoTitles.push(row.title)
+        })
+        resolve(memoTitles)
+      })
+    })
+  })().then(memoTitles => {
+    const { Select } = require('enquirer')
+
+    const prompt = new Select({
+      name: 'title',
+      message: 'Choose a note you want to see:',
+      choices: memoTitles
+    })
+
+    prompt.run()
+      .then(title => {
+        db.get(`SELECT content FROM memos WHERE title = '${title}'`, (err, row) => {
+          if (err) {
+            console.error(err.message)
+          }
+          console.log(row.content)
+        })
+        db.close()
+      })
+  })
 } else {
   process.stdin.setEncoding('utf8')
 
