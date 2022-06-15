@@ -46,6 +46,39 @@ if (options.l) {
         db.close()
       })
   })
+} else if (options.d) {
+  (() => {
+    return new Promise(resolve => {
+      const memoTitles = []
+      db.all('SELECT title FROM memos', (err, rows) => {
+        if (err) {
+          console.error(err.message)
+        }
+        rows.forEach(row => {
+          memoTitles.push(row.title)
+        })
+        resolve(memoTitles)
+      })
+    })
+  })().then(memoTitles => {
+    const { Select } = require('enquirer')
+
+    const prompt = new Select({
+      name: 'title',
+      message: 'Choose a note you want to delete:',
+      choices: memoTitles
+    })
+
+    prompt.run()
+      .then(title => {
+        db.get(`DELETE FROM memos WHERE title = '${title}'`, err => {
+          if (err) {
+            console.error(err.message)
+          }
+        })
+        db.close()
+      })
+  })
 } else {
   process.stdin.setEncoding('utf8')
 
