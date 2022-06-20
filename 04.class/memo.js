@@ -63,26 +63,34 @@ if (options.l) {
     db.close()
   })()
 } else {
-  process.stdin.setEncoding('utf8')
+  function getText () {
+    return new Promise(resolve => {
+      process.stdin.setEncoding('utf8')
+      const lines = []
+      const rl = require('readline').createInterface({
+        input: process.stdin
+      })
 
-  const lines = []
-  const rl = require('readline').createInterface({
-    input: process.stdin
-  })
+      rl.on('line', (line) => {
+        lines.push(line)
+      })
+      rl.on('close', () => {
+        resolve(lines)
+      })
+    })
+  }
 
-  rl.on('line', (line) => {
-    lines.push(line)
-  })
-  rl.on('close', () => {
+  (async () => {
+    const texts = await getText()
     db.serialize(() => {
       db.run('CREATE TABLE IF NOT EXISTS memos (title TEXT, content TEXT)')
-      const title = lines[0]
-      lines.shift()
-      const content = lines.join('\n')
+      const title = texts[0]
+      texts.shift()
+      const content = texts.join('\n')
       const insertData = db.prepare('INSERT INTO memos VALUES (?, ?)')
       insertData.run(title, content)
       insertData.finalize()
     })
     db.close()
-  })
+  })()
 }
