@@ -17,6 +17,18 @@ function getMemoTitles () {
   })
 }
 
+async function generatePrompt (message) {
+  const memoTitles = await getMemoTitles()
+  const { Select } = require('enquirer')
+  const prompt = new Select({
+    name: 'title',
+    message: `Choose a note you want to ${message}:`,
+    choices: memoTitles
+  })
+
+  return prompt
+}
+
 if (options.l) {
   (async () => {
     const memoTitles = await getMemoTitles()
@@ -27,13 +39,7 @@ if (options.l) {
   })()
 } else if (options.r) {
   (async () => {
-    const memoTitles = await getMemoTitles()
-    const { Select } = require('enquirer')
-    const prompt = new Select({
-      name: 'title',
-      message: 'Choose a note you want to see:',
-      choices: memoTitles
-    })
+    const prompt = await generatePrompt('see')
     const answer = await prompt.run()
 
     db.get(`SELECT content FROM memos WHERE title = '${answer}'`, (err, row) => {
@@ -46,13 +52,7 @@ if (options.l) {
   })()
 } else if (options.d) {
   (async () => {
-    const memoTitles = await getMemoTitles()
-    const { Select } = require('enquirer')
-    const prompt = new Select({
-      name: 'title',
-      message: 'Choose a note you want to delete:',
-      choices: memoTitles
-    })
+    const prompt = await generatePrompt('delete')
     const answer = await prompt.run()
 
     db.get(`DELETE FROM memos WHERE title = '${answer}'`, err => {
