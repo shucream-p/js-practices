@@ -70,7 +70,7 @@ class MemoController {
     console.log(memo.content)
   }
 
-  async delete () {
+  async destroy () {
     const memos = await this.storage.read()
     const titles = memos.map(({ content }) => content.split('\n')[0])
     const prompt = await this.generatePrompt('delete', titles)
@@ -121,7 +121,7 @@ function main () {
     memoController.show()
   } else if (options.d) {
     // タイトル一覧から選択してメモを削除する処理
-    memoController.delete()
+    memoController.destroy()
   } else {
     // 標準入力を受け取って、メモを保存する処理
     memoController.create()
