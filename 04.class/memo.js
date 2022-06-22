@@ -9,12 +9,10 @@ class Storage {
   create (texts) {
     // データベースにメモを保存
     this.db.serialize(() => {
-      this.db.run('CREATE TABLE IF NOT EXISTS memos (title TEXT, content TEXT)')
-      const title = texts[0]
-      texts.shift()
+      this.db.run('CREATE TABLE IF NOT EXISTS memos (id INTEGER PRIMARY KEY AUTOINCREMENT, content TEXT)')
       const content = texts.join('\n')
-      const insertData = this.db.prepare('INSERT INTO memos VALUES (?, ?)')
-      insertData.run(title, content)
+      const insertData = this.db.prepare('INSERT INTO memos VALUES (NULL, ?)')
+      insertData.run(content)
       insertData.finalize()
     })
   }
@@ -35,9 +33,9 @@ class Storage {
     })
   }
 
-  delete (answer) {
+  delete (id) {
     // データベースからメモを削除
-    this.db.run(`DELETE FROM memos WHERE title = '${answer}'`, err => {
+    this.db.run(`DELETE FROM memos WHERE id = '${id}'`, err => {
       if (err) {
         console.error(err.message)
       }
@@ -57,30 +55,28 @@ class MemoController {
 
   async index () {
     const memos = await this.storage.read()
-    memos.forEach(memo => {
-      console.log(memo.title)
+    const titles = memos.map(({ content }) => content.split('\n')[0])
+    titles.forEach(title => {
+      console.log(title)
     })
   }
 
   async show () {
     const memos = await this.storage.read()
-    const titles = memos.map(memo => {
-      return memo.title
-    })
+    const titles = memos.map(({ content }) => content.split('\n')[0])
     const prompt = await this.generatePrompt('see', titles)
     const answer = await prompt.run()
-    const memo = memos.find(memo => memo.title === answer)
+    const memo = memos.find(({ content }) => content.split('\n')[0] === answer)
     console.log(memo.content)
   }
 
   async delete () {
     const memos = await this.storage.read()
-    const titles = memos.map(memo => {
-      return memo.title
-    })
+    const titles = memos.map(({ content }) => content.split('\n')[0])
     const prompt = await this.generatePrompt('delete', titles)
     const answer = await prompt.run()
-    this.storage.delete(answer)
+    const memo = memos.find(({ content }) => content.split('\n')[0] === answer)
+    this.storage.delete(memo.id)
   }
 
   getStdin () {
