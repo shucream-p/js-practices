@@ -13,9 +13,7 @@ module.exports = class MemoController {
   async index () {
     const memos = await this.storage.read()
     const titles = memos.map(({ content }) => content.split('\n')[0])
-    titles.forEach(title => {
-      console.log(title)
-    })
+    titles.forEach(title => console.log(title))
   }
 
   async show () {
@@ -44,12 +42,8 @@ module.exports = class MemoController {
         input: process.stdin
       })
 
-      rl.on('line', (line) => {
-        lines.push(line)
-      })
-      rl.on('close', () => {
-        resolve(lines)
-      })
+      rl.on('line', line => lines.push(line))
+      rl.on('close', () => resolve(lines))
     })
   }
 
