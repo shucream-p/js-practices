@@ -11,27 +11,51 @@ module.exports = class MemoController {
   }
 
   async index () {
-    const memos = await this.storage.read()
-    const titles = memos.map(({ content }) => content.split('\n')[0])
-    titles.forEach(title => console.log(title))
+    try {
+      const memos = await this.storage.read()
+
+      if (memos.length === 0) {
+        throw new Error('メモがありません')
+      }
+      const titles = memos.map(({ content }) => content.split('\n')[0])
+      titles.forEach(title => console.log(title))
+    } catch (e) {
+      console.log(e)
+    }
   }
 
   async show () {
-    const memos = await this.storage.read()
-    const titles = memos.map(({ content }) => content.split('\n')[0])
-    const prompt = await this.generatePrompt('see', titles)
-    const answer = await prompt.run()
-    const memo = memos.find(({ content }) => content.split('\n')[0] === answer)
-    console.log(memo.content)
+    try {
+      const memos = await this.storage.read()
+
+      if (memos.length === 0) {
+        throw new Error('メモがありません')
+      }
+      const titles = memos.map(({ content }) => content.split('\n')[0])
+      const prompt = await this.generatePrompt('see', titles)
+      const answer = await prompt.run()
+      const memo = memos.find(({ content }) => content.split('\n')[0] === answer)
+      console.log(memo.content)
+    } catch (e) {
+      console.log(e)
+    }
   }
 
   async destroy () {
-    const memos = await this.storage.read()
-    const titles = memos.map(({ content }) => content.split('\n')[0])
-    const prompt = await this.generatePrompt('delete', titles)
-    const answer = await prompt.run()
-    const memo = memos.find(({ content }) => content.split('\n')[0] === answer)
-    this.storage.delete(memo.id)
+    try {
+      const memos = await this.storage.read()
+
+      if (memos.length === 0) {
+        throw new Error('メモがありません')
+      }
+      const titles = memos.map(({ content }) => content.split('\n')[0])
+      const prompt = await this.generatePrompt('delete', titles)
+      const answer = await prompt.run()
+      const memo = memos.find(({ content }) => content.split('\n')[0] === answer)
+      this.storage.delete(memo.id)
+    } catch (e) {
+      console.log(e)
+    }
   }
 
   getStdin () {
